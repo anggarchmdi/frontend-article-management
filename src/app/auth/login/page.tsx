@@ -1,33 +1,98 @@
+"use client"
+
+import axios from "@/lib/axios"
+import { Eye, EyeOff } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+
 export default function Login() {
-    return(
-        <div className="w-screen bg-gray-100 h-screen flex justify-center items-center">
-            {/* form login */}
-            <div className="flex bg-white rounded-xl flex-col w-[343px] h-[344px] lg:w-[400px] lg:h-[375px] items-center py-8">
-                {/* logo */}
-                <div className="flex justify-center lg:mb-4">
-                    <h1 className="font-bold text-xl text-blue-950">Loremipsum.</h1>
-                </div>
-                {/* form */}
-                <div className="p-4 lg:p-0 w-[343px] h-[344px] lg:w-[368px] lg:h-[140px] space-y-4">
-                    {/* username */}
-                    <div className="flex flex-col">
-                    <label htmlFor="username" className="font-semibold">Username</label>
-                    <input type="text" className="p-2.5 rounded-md border-2" placeholder="Input username"  />
-                    </div>
-                    {/* password */}
-                    <div className="flex flex-col">
-                        <label htmlFor="password" className="font-semibold">Password</label>
-                        <input className="p-2.5 rounded-md border-2" type="password" placeholder="Input password" />
-                    </div>
-                </div>
-                <div className="lg:mt-10 w-[323px] lg:w-[368px] ">
-                <button className="py-2 bg-[#2563EB] w-full font-semibold text-white rounded-lg transition-all transform hover:scale-95 duration-300">Login</button>
-                </div>
-                <div className="flex justify-center lg:mt-4 mt-2">
-                <p className="text-gray-500">Don't have an acccount?</p>
-                <a href="/auth/register" className="text-blue-500 ml-1 underline font-semibold">Register</a>
-                </div>
-            </div>
+  const router = useRouter()
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [errors, setErrors] = useState<{ username?: string; password?: string }>({})
+
+  const handleLogin = async () => {
+    let valid = true
+    const newErrors: typeof errors = {}
+
+    if (!username) {
+      newErrors.username = "Please enter your username"
+      valid = false
+    }
+
+    if (!password) {
+      newErrors.password = "Please enter your password"
+      valid = false
+    }
+
+    if (!valid) {
+      setErrors(newErrors)
+      return
+    }
+
+    try {
+      const res = await axios.post("/auth/login", { username, password })
+      const token = res.data.token
+      localStorage.setItem("token", token)
+      localStorage.setItem("auth", JSON.stringify(res.data.auth))
+      router.push("/articles")
+    } catch (err) {
+      alert("Login gagal. Periksa username atau password.")
+    }
+  }
+
+  return (
+    <div className="w-screen bg-gray-100 h-screen flex justify-center items-center">
+      <div className="bg-white p-6 rounded-xl w-[343px] lg:w-[400px] space-y-4">
+        <div className="text-center mb-4">
+          <h1 className="text-xl font-bold text-blue-900">Logoipsum</h1>
         </div>
-    )
+        <div>
+          <label className="font-semibold">Username</label>
+          <input
+            type="text"
+            className="w-full p-2.5 rounded-md border-2"
+            placeholder="Input username"
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value)
+              setErrors((prev) => ({ ...prev, username: "" }))
+            }}
+          />
+          {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
+        </div>
+        <div className="relative">
+          <label className="font-semibold">Password</label>
+          <input
+            type={showPassword ? "text" : "password"}
+            className="w-full p-2.5 rounded-md border-2"
+            placeholder="Input password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              setErrors((prev) => ({ ...prev, password: "" }))
+            }}
+          />
+          <button
+            type="button"
+            className="absolute right-4 top-[40px] text-gray-500"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+          {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+        </div>
+        <button
+          onClick={handleLogin}
+          className="w-full py-2 bg-[#2563EB] text-white font-semibold rounded-lg hover:scale-95 transition"
+        >
+          Login
+        </button>
+        <p className="text-center text-sm text-gray-600">
+          Don’t have an account? <a href="/auth/register" className="text-blue-600 underline">Register</a>
+        </p>
+      </div>
+    </div>
+  )
 }
