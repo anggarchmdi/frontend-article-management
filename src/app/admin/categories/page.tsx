@@ -1,53 +1,249 @@
 "use client"
 import { useEffect, useState } from "react"
 import axios from "@/lib/axios"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationLink,
+} from "@/components/ui/pagination"
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 
 export default function Categories() {
+  const [selectedCategory, setSelectedCategory] = useState("")
   const [categories, setCategories] = useState<any[]>([])
-  const [name, setName] = useState("")
+  const [search, setSearch] = useState("")
+  const [newName, setNewName] = useState("")
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCategories, setTotalCategories] = useState(0)
+  const [editData, setEditData] = useState<{ id: string; name: string } | null>(null)
 
-  const fetchCategories = async () => {
-    const res = await axios.get("/categories")
-    setCategories(res.data.data)
+
+  
+  const itemsPerPage = 10
+
+  const fetchCategories = async (page: number) => {
+    try{
+      const params: any ={
+        page,
+        limit: itemsPerPage,
+      }
+      if(selectedCategory) params.category = selectedCategory
+      if(search) params.title = search
+
+      const res = await axios.get("/categories", { params })
+      setCategories(res.data.data)
+      setTotalCategories(res.data.total)
+      setTotalPages(Math.ceil(res.data.total / itemsPerPage))
+    } catch (err) {
+      console.log("failed to fetch categories : ", err)
+    }
   }
 
   const handleAdd = async () => {
-    if (!name.trim()) return
-    await axios.post("/categories", { name })
-    setName("")
-    fetchCategories()
+    if (!newName.trim()) return
+    await axios.post("/categories", { name: newName })
+    setNewName("")
+    setShowAddModal(false)
+    fetchCategories(currentPage)
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure to delete this category?")) return
-    await axios.delete(`/categories/${id}`)
-    fetchCategories()
+  const handleEdit = async () => {
+    if (!editData?.name.trim()) return
+    await axios.put(`/categories/${editData.id}`, { name: editData.name })
+    setEditData(null)
+    fetchCategories(currentPage)
+  }
+  
+
+  const handleDelete = async () => {
+    if (!deleteId) return
+    await axios.delete(`/categories/${deleteId}`)
+    setDeleteId(null)
+    fetchCategories(currentPage)
   }
 
   useEffect(() => {
-    fetchCategories()
+    fetchCategories(currentPage)
   }, [])
 
+  const handlePaginate = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const filtered = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Categories</h2>
-      <div className="mb-4 flex gap-2">
-        <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          className="border p-2 rounded w-full"
-          placeholder="New category name"
+    <div className="flex flex-col w-full">
+      <h2 className="text-[1rem] font-semibold py-4 border rounded-t-lg px-2">Total Category : {filtered.length}</h2>
+      <div className="flex justify-between items-center py-4 px-2 border">
+        <Input
+          placeholder="🔍 Search Category"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-80"
         />
-        <button onClick={handleAdd} className="bg-blue-600 text-white px-4 rounded">Add</button>
+        <Button className="hover:cursor-pointer transition-all transform hover:scale-95 duration-300" onClick={() => setShowAddModal(true)}>+ Add Category</Button>
       </div>
-      <ul className="space-y-2">
-        {categories.map(cat => (
-          <li key={cat.id} className="flex justify-between bg-white p-2 rounded border">
-            <span>{cat.name}</span>
-            <button onClick={() => handleDelete(cat.id)} className="text-red-500">Delete</button>
-          </li>
-        ))}
-      </ul>
+
+      <table className="w-full bg-white rounded-md border border-collapse overflow-hidden">
+        <thead className="bg-gray-100 border">
+          <tr className="border-2 border-collapse">
+            <th className="p-3 text-left">Category</th>
+            <th className="p-3 text-left">Created at</th>
+            <th className="p-3 text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.map((cat) => (
+            <tr key={cat.id} className="border border-collapse">
+              <td className="p-3">{cat.name}</td>
+              <td className="p-3">
+                {new Date(cat.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </td>
+              <td className="p-3 space-x-2">
+              <button
+                  className="text-blue-600 hover:cursor-pointer"
+                  onClick={() => setEditData({ id: cat.id, name: cat.name })}
+                >
+                  Edit
+                </button>
+                <button
+                  className="text-red-600 cursor-pointer"
+                  onClick={() => setDeleteId(cat.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+       <Pagination className="mt-8">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (currentPage > 1) handlePaginate(currentPage - 1)
+                    }}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+      
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((number) => (
+                  <PaginationItem key={number}>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handlePaginate(number)
+                      }}
+                      isActive={currentPage === number}
+                    >
+                      {number}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+      
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (currentPage < totalPages) handlePaginate(currentPage + 1)
+                    }}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+
+      {/* Add Modal */}
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent className="w-[400px] h-[200px]">
+          <DialogHeader>
+            <DialogTitle>Add Category</DialogTitle>
+          </DialogHeader>
+          <Input
+            placeholder="Input Category"
+            className="border active:border-none"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" className="transition-all transform  hover:scale-95 duration-300 hover:cursor-pointer" onClick={() => setShowAddModal(false)}>Cancel</Button>
+            <Button onClick={handleAdd} className="bg-[#2563EB] transition-all transform hover:scale-95 duration-300 hover:cursor-pointer">Add</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Modal */}
+      <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Category</DialogTitle>
+          </DialogHeader>
+          <p>Are you sure you want to delete this category?</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editData} onOpenChange={() => setEditData(null)}>
+        <DialogContent className="w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Edit Category</DialogTitle>
+          </DialogHeader>
+          <Input
+            placeholder="Category"
+            value={editData?.name || ""}
+            onChange={(e) =>
+              setEditData((prev) => (prev ? { ...prev, name: e.target.value } : null))
+            }
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditData(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEdit}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
     </div>
   )
 }
