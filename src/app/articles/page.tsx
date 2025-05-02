@@ -129,7 +129,7 @@ import {
                 </div>
             </div>
             {/* content */}
-            <div className="max-h-[1780px] lg:max-h-[1680px] w-full">
+            <div className="max-h-[1780px] lg:min-h-96 lg:max-h-[1680px] w-full">
                 <div className="mx-auto container p-6 lg:p-12">
                     <p className="mb-6 text-[1rem] font-semibold text-gray-500">Lorem ipsum dolor sit.</p>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 space-y-12">

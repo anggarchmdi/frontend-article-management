@@ -34,9 +34,17 @@ export default function Login() {
     try {
       const res = await axios.post("/auth/login", { username, password })
       const token = res.data.token
+
       localStorage.setItem("token", token)
       localStorage.setItem("auth", JSON.stringify(res.data.auth))
-      router.push("/articles")
+      document.cookie = `token=${token}; path=/`
+      document.cookie = `auth=${encodeURIComponent(JSON.stringify(res.data.auth))}; path=/`
+
+      if (res.data.auth.role === "Admin") {
+        router.push("/admin")
+      } else {
+        router.push("/articles")
+      }
     } catch (err) {
       alert("Login gagal. Periksa username atau password.")
     }
