@@ -14,7 +14,6 @@ import {
     PaginationNext,
     PaginationPrevious,
   } from "@/components/ui/pagination";
-// import { title } from "process"
 
   export default function Articles() {
     const [articles, setArticles] = useState<any[]>([]);
