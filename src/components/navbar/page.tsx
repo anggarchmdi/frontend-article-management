@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import Cookies from "js-cookie"
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -22,29 +23,33 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Get auth from localStorage
   useEffect(() => {
-    if (typeof window === "undefined") return
-
-    const authData = localStorage.getItem("auth")
-
-    if (!authData || authData === "undefined" || authData.trim() === "") return
-
-    try {
-      const parsed = JSON.parse(authData)
-      setUser(parsed)
-    } catch (err) {
-      console.error("Gagal parse auth JSON:", err)
-      localStorage.removeItem("auth") // Bersihkan jika corrupt
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
-  }, [])
+  }, []);  
+
+  useEffect(() => {
+    const authData = Cookies.get("auth");
+    if (authData) {
+      try {
+        const parsed = JSON.parse(authData);
+        setUser(parsed); // This will store username and role from the cookie
+      } catch (err) {
+        console.error("Failed to parse auth data:", err);
+        Cookies.remove("auth");
+      }
+    }
+  }, []);
+  
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("auth")
-    router.push("/auth/login")
+    Cookies.remove("token");
+    Cookies.remove("auth");
+    router.push("/auth/login");
   }
-
+  
   return (
     <>
       <div
@@ -64,10 +69,11 @@ export default function Navbar() {
               onClick={() => setShowDropdown((prev) => !prev)}
               className="flex items-center gap-2 hover:underline"
             >
-              <div className="w-8 h-8 rounded-full bg-blue-200 text-blue-900 flex items-center justify-center font-semibold">
-                {user.username.charAt(0).toUpperCase()}
+              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                {user?.username?.charAt(0).toUpperCase() || 'U'}
               </div>
-              <span className="hidden sm:inline">{user.username}</span>
+
+              <span className="hidden sm:inline">{user.username ?? "Unknown"}</span>
             </button>
 
             {showDropdown && (
