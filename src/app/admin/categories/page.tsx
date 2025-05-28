@@ -32,8 +32,8 @@ export default function Categories() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalCategories, setTotalCategories] = useState(0)
   const [editData, setEditData] = useState<{ id: string; name: string } | null>(null)
-
-
+  const [error, setError] = useState("")
+  const categoryToDelete = categories.find((cat) => cat.id ===deleteId)
   
   const itemsPerPage = 10
 
@@ -56,11 +56,20 @@ export default function Categories() {
   }
 
   const handleAdd = async () => {
-    if (!newName.trim()) return
-    await axios.post("/categories", { name: newName })
-    setNewName("")
-    setShowAddModal(false)
-    fetchCategories(currentPage)
+    if (!newName.trim()) {
+      setError("Category field cannot be empty")
+      return
+    }
+    
+    try {
+      await axios.post("/categories", { name: newName })
+      setNewName("")
+      setShowAddModal(false)
+      setError("")
+      fetchCategories(currentPage)
+    } catch (err) {
+      setError('Failed to add category')
+    }  
   }
 
   const handleEdit = async () => {
@@ -101,7 +110,7 @@ export default function Categories() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-80"
         />
-        <Button className="hover:cursor-pointer transition-all transform hover:scale-95 duration-300" onClick={() => setShowAddModal(true)}>+ Add Category</Button>
+        <Button className="hover:cursor-pointer bg-blue-600 hover:bg-blue-700 transition-all transform hover:scale-95 duration-300" onClick={() => setShowAddModal(true)}>+ Add Category</Button>
       </div>
 
       <table className="w-full bg-white rounded-md border border-collapse overflow-hidden">
@@ -127,13 +136,13 @@ export default function Categories() {
               </td>
               <td className="p-3 space-x-2">
               <button
-                  className="text-blue-600 hover:cursor-pointer"
+                  className="text-blue-600 hover:cursor-pointer underline"
                   onClick={() => setEditData({ id: cat.id, name: cat.name })}
                 >
                   Edit
                 </button>
                 <button
-                  className="text-red-600 cursor-pointer"
+                  className="text-red-600 cursor-pointer underline"
                   onClick={() => setDeleteId(cat.id)}
                 >
                   Delete
@@ -187,30 +196,38 @@ export default function Categories() {
 
       {/* Add Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="w-[400px] h-[200px]">
+        <DialogContent className="w-[400px] h-[240px]">
           <DialogHeader>
             <DialogTitle>Add Category</DialogTitle>
           </DialogHeader>
+          <div className="space-y-2">
+          <h1>Category</h1>
           <Input
             placeholder="Input Category"
-            className="border active:border-none"
+            className="border-none"
             value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-          />
+            onChange={(e) => {
+              setNewName(e.target.value)
+              if (e.target.value.trim()) setError("")
+              }}
+            />
+            {error && <p className="text-red-500 text-sm">{error }</p>}
+            </div>
           <DialogFooter>
             <Button variant="outline" className="transition-all transform  hover:scale-95 duration-300 hover:cursor-pointer" onClick={() => setShowAddModal(false)}>Cancel</Button>
-            <Button onClick={handleAdd} className="bg-[#2563EB] transition-all transform hover:scale-95 duration-300 hover:cursor-pointer">Add</Button>
+            <Button onClick={handleAdd} className="bg-[#2563EB] hover:bg-blue-700 transition-all transform hover:scale-95 duration-300 hover:cursor-pointer">Add</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Modal */}
-      <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <DialogContent>
+      {deleteId && categoryToDelete && (
+        <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <DialogContent className="w-[400px] h-[180px]">
           <DialogHeader>
             <DialogTitle>Delete Category</DialogTitle>
           </DialogHeader>
-          <p>Are you sure you want to delete this category?</p>
+          <p className="text-slate-500">Delete category “{categoryToDelete.name ?? "unknown"}"? This will remove it from master data permanently.</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteId(null)}>
               Cancel
@@ -221,9 +238,10 @@ export default function Categories() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      )}
 
       <Dialog open={!!editData} onOpenChange={() => setEditData(null)}>
-        <DialogContent className="w-[400px]">
+        <DialogContent className="w-[400px] h-[240px]">
           <DialogHeader>
             <DialogTitle>Edit Category</DialogTitle>
           </DialogHeader>
@@ -235,10 +253,10 @@ export default function Categories() {
             }
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditData(null)}>
+            <Button variant="outline" className="transition-all transform hover:scale-95 duration-300 hover:cursor-pointer" onClick={() => setEditData(null)}>
               Cancel
             </Button>
-            <Button onClick={handleEdit}>Save Changes</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 transition-all transform hover:scale-95 duration-300 hover:cursor-pointer" onClick={handleEdit}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

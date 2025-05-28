@@ -133,7 +133,7 @@ export default function AdminArticles() {
             <th className="p-3 text-center px-4 min-w-max">Title</th>
             <th className="p-3 text-center px-4 min-w-max">Category</th>
             <th className="p-3 text-center px-4 min-w-max">Created</th>
-            <th className="p-3 text-center px-4 min-w-max">Actions</th>
+            <th className="p-3 text-center px-4 min-w-max">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -162,13 +162,13 @@ export default function AdminArticles() {
                 })}
               </td>
               <td className="p-3 space-x-2 text-center">
-                <Link href={`/articles/${article.id}`} className="text-blue-600">
+                <Link href={`/articles/${article.id}`} className="text-blue-600 underline hover:cursor-pointer">
                   Preview
                 </Link>
-                <Link href={`/admin/articles/${article.id}/edit`} className="text-blue-600">
+                <Link href={`/admin/articles/${article.id}/edit`} className="text-blue-600 underline hover:cursor-pointer">
                   Edit
                 </Link>
-               <button onClick={() => setDeleteId(article.id)} className="text-red-600">Delete</button>
+               <button onClick={() => setDeleteId(article.id)} className="text-red-600 underline hover:cursor-pointer">Delete</button>
               </td>
             </tr>
           ))}
@@ -217,16 +217,16 @@ export default function AdminArticles() {
       </Pagination>
 
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[400px] h-[180px]">
           <DialogHeader>
             <DialogTitle>Delete Articles</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600">Deleting this article is permanent and cannot be undone. All related content will be removed.</p>
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setDeleteId(null)}>
+          <p className="text-[0.85rem] text-gray-600">Deleting this article is permanent and cannot be undone. All related content will be removed.</p>
+          <DialogFooter className="">
+            <Button variant="outline" className="hover:cursor-pointer transition-all transform hover:scale-95 duration-300" onClick={() => setDeleteId(null)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+            <Button variant="destructive" className="hover:cursor-pointer transition-all transform hover:scale-95 duration-300" onClick={handleDelete} disabled={isDeleting}>
               {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
