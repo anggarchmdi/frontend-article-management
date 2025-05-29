@@ -34,13 +34,18 @@ export default function Login() {
     try {
       const res = await axios.post("/auth/login", { username, password })
       const token = res.data.token
-
       localStorage.setItem("token", token)
-      localStorage.setItem("auth", JSON.stringify(res.data.auth))
       document.cookie = `token=${token}; path=/`
-      document.cookie = `auth=${encodeURIComponent(JSON.stringify(res.data.auth))}; path=/`
 
-      if (res.data.auth.role === "Admin") {
+      const profileRes = await axios.get("/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      const auth = profileRes.data
+      localStorage.setItem("auth", JSON.stringify(auth))
+      document.cookie = `auth=${encodeURIComponent(JSON.stringify(auth))}; path=/`
+
+      if (auth.role === "Admin") {
         router.push("/admin")
       } else {
         router.push("/articles")
