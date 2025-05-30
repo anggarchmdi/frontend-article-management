@@ -7,6 +7,7 @@ import Navbar from "@/components/navbar/page"
 import Footer from "@/components/footer/page"
 import Link from "next/link"
 
+
 export default function DetailArticles() {
   const { id } = useParams()
   interface Article {
@@ -54,9 +55,7 @@ export default function DetailArticles() {
           },
         })
         const allArticles = res.data.data
-           // Filter out current article
     const filtered = allArticles.filter((item: any) => item.id !== id)
-    // Shuffle & ambil 3
     const shuffled = filtered.sort(() => 0.5 - Math.random()).slice(0, 3)
     setRelatedArticles(shuffled)
       } catch (err) {
