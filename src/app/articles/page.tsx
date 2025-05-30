@@ -5,6 +5,7 @@ import Image from "next/image"
 import axios from "@/lib/axios"
 import { useEffect, useState } from "react"
 import Footer from "@/components/footer/page"
+import { useRouter } from "next/navigation"
 
 import {
     Pagination,
@@ -23,6 +24,8 @@ import {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [itemsPerPage, setItemPerPage] = useState(9)
+    const router = useRouter()
+    const [isAuthorized, setIsAuthorized] = useState(false)
 
     const fetchArticles = async () => {
             try{
@@ -74,6 +77,24 @@ import {
             setCurrentPage(pageNumber)
             window.scrollTo({top: 0, behavior: "smooth"})
         }
+
+        useEffect(() => {
+        const auth = localStorage.getItem("auth")
+        if (auth) {
+        const role = JSON.parse(auth).role
+
+        if (role !== "User") {
+            router.push("/unauthorized")
+        } else {
+            setIsAuthorized(true)
+        }
+        } else {
+        router.push("/auth/login")
+        }
+    }, [])
+
+    if (!isAuthorized) return null
+
 
         return(
         <>
