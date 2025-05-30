@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextRequest, NextResponse } from "next/server"
 
 export function middleware(request: NextRequest) {
@@ -15,7 +14,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/articles", request.url))
   }
 
-  // Role-based redirection
   if (authData) {
     try {
       const user = JSON.parse(authData)
@@ -23,12 +21,12 @@ export function middleware(request: NextRequest) {
       const isAdminPath = request.nextUrl.pathname.startsWith("/admin")
       const isUserPath = request.nextUrl.pathname.startsWith("/articles")
 
-      if (user.role === "admin" && isUserPath) {
-        return NextResponse.redirect(new URL("/admin", request.url))
+      if (user.role === "Admin" && isUserPath) {
+        return NextResponse.redirect(new URL("/unauthorized", request.url))
       }
 
-      if (user.role === "user" && isAdminPath) {
-        return NextResponse.redirect(new URL("/articles", request.url))
+      if (user.role === "User" && isAdminPath) {
+        return NextResponse.redirect(new URL("/unauthorized", request.url))
       }
 
     } catch (err) {
