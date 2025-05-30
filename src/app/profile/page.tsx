@@ -80,9 +80,15 @@ export default function Profile() {
           </div>
 
           <button
-            onClick={() => router.push("/")}
-            className="mt-8 w-full bg-blue-600 hover:cursor-pointer hover:bg-blue-700 text-white font-semibold py-2 rounded-md"
-          >
+          onClick={() => {
+            if (user?.role === "Admin") {
+              router.push("/admin/articles")
+            } else {
+              router.push("/articles")
+            }
+          }}
+          className="mt-8 w-full bg-blue-600 hover:cursor-pointer hover:bg-blue-700 text-white font-semibold py-2 rounded-md"
+        >
             Back to home
           </button>
         </div>
