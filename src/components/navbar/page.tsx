@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Cookies from "js-cookie"
+import { usePathname } from "next/navigation" 
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -12,6 +13,8 @@ export default function Navbar() {
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const dropdownRef = useRef(null)
   const router = useRouter()
+  const pathname = usePathname();
+  const isArticlePage = pathname === "/articles";
 
   // Handle navbar scroll style
   useEffect(() => {
@@ -53,9 +56,13 @@ export default function Navbar() {
   return (
     <>
       <div
-        className={`w-full fixed top-0 z-10 p-4 duration-300 flex justify-between items-center lg:px-12 ${
-          isScrolled ? "bg-white text-black shadow-md" : "bg-transparent text-white"
-        }`}
+        className={`w-full fixed top-0 z-10 p-2 duration-300 flex justify-between items-center lg:px-12 ${
+            isScrolled
+              ? "bg-white text-black shadow-md"
+              : isArticlePage
+                ? "bg-transparent text-white"
+                : "bg-transparent text-[#000150]"
+          }`}
       >
         {/* Logo */}
         <Link href="/articles">
