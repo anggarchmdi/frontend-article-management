@@ -13,17 +13,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [showLogoutDialog,setShowLogoutDialog] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
-
+  const [checkingRole, setCheckingRole] = useState(true)
 
   useEffect(() => {
     const auth = Cookies.get("auth")
     if (auth) {
       try {
-        setUser(JSON.parse(auth))
-      } catch {
-        Cookies.remove("auth")
-        setUser(null)
-      }
+        const user = JSON.parse(auth)
+
+        if (user.role !== "Admin") {
+          router.replace("/unauthorized")
+        return
+      } 
+      setUser(user)
+      setCheckingRole(false)
+    } catch {
+      Cookies.remove("auth")
+      router.replace("/auth/login")
+    }
+    } else {
+    router.replace("/auth/login")
     }
   }, [])
 
@@ -34,6 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push("/auth/login")
   }
 
+  if (checkingRole) return null
   return (
     <div className="flex min-h-screen">
       <aside className="w-[250px] bg-blue-600 text-white p-6 flex flex-col">
