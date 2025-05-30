@@ -73,12 +73,21 @@ export default function Categories() {
   }
 
   const handleEdit = async () => {
-    if (!editData?.name.trim()) return
+  if (!editData?.name.trim()) {
+    setError("Category name cannot be empty")
+    return
+  }
+
+  try {
     await axios.put(`/categories/${editData.id}`, { name: editData.name })
     setEditData(null)
+    setError("")
     fetchCategories(currentPage)
+  } catch (err) {
+    setError("Failed to update category")
   }
-  
+}
+
 
   const handleDelete = async () => {
     if (!deleteId) return
