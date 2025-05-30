@@ -131,11 +131,11 @@ import {
             <div className="max-h-[1780px] lg:min-h-96 lg:max-h-[1680px] w-full">
                 <div className="mx-auto container p-6 lg:p-12">
                     <p className="mb-6 text-[1rem] font-semibold text-gray-500">Lorem ipsum dolor</p>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 space-y-12">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:gap-x-4 space-y-12">
                         {/* card */}
                         {articles.map((item) => (
                             <Link key={item.id} href={`/articles/${item.id}`}>  
-                            <div className="transition-all transform hover:scale-95 hover:cursor-pointer  duration-300 w-[335px] h-[368px] lg:w-[400px] lg:h-[432px] rounded-t-xl  space-y-2">
+                            <div className="transition-all transform hover:scale-95 hover:cursor-pointer  duration-300 w-[335px] h-[368px] xl:w-[370px] xl:h-[432px] 2xl:w-[420px] 2xl:h-[432px] rounded-t-xl  space-y-2">
                             {/* img */}
                             <div className="h-[240px] flex justify-center">
                                 <img src={item.imageUrl || "/images/cardimg.jpg"} className="w-full rounded-xl object-cover" alt="" />

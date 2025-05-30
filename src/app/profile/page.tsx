@@ -1,72 +1,94 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import axios from "@/lib/axios"
 import Cookies from "js-cookie"
+import { useRouter } from "next/navigation"
+
+interface UserProfile {
+  id: string
+  username: string
+  password: string
+  role: string
+}
 
 export default function Profile() {
-  const [user, setUser] = useState<{ username: string; role: string } | null>(null)
+  const [user, setUser] = useState<UserProfile | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    const authData = Cookies.get("auth")
-    if (authData) {
-      try {
-        const parsed = JSON.parse(authData)
-        if (typeof parsed === "object" && parsed !== null && "username" in parsed && "role" in parsed) {
-          setUser(parsed)
-        } else {
-          throw new Error("Invalid user data structure")
-        }
-      } catch (error) {
-        console.error("Failed to parse auth data:", error)
-        setError("Failed to parse authentication data. Redirecting to login.")
+    const token = Cookies.get("token")
+
+    if (!token) {
+      setError("No token found. Redirecting to login...")
+      router.push("/auth/login")
+      return
+    }
+
+    axios
+      .get("/auth/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setUser(res.data)
+      })
+      .catch(() => {
+        setError("Session expired or invalid. Please login again.")
+        Cookies.remove("token")
         Cookies.remove("auth")
         router.push("/auth/login")
-      }
-    } else {
-      setError("No authentication data found. Redirecting to login.")
-      router.push("/auth/login")
-    }
+      })
   }, [router])
 
   if (error) {
-    return <div className="text-center p-8 text-red-500">{error}</div>
+    return <p className="text-center text-red-500 mt-10">{error}</p>
   }
 
-  if (!user) return <div className="text-center p-8">Loading...</div>
-
   return (
-    <div className="min-h-screen flex justify-center items-center bg-white">
-      <div className="bg-white p-4 rounded-xl w-[400px] flex flex-col items-center gap-4">
-        <h2 className="text-xl font-semibold text-center">User Profile</h2>
-        <div className="w-20 h-20 rounded-full bg-blue-200 text-blue-900 flex items-center justify-center text-xl font-bold">
-          {user.username.charAt(0).toUpperCase()}
-        </div>
-        <div className="w-full space-y-2">
-          <div className="flex items-center w-[368px] bg-[#F3F4F6] px-4 py-2 rounded-md">
-            <span className="font-semibold min-w-20">Username</span>
-            <span>: </span>
-            <div className="flex justify-start">
-              <h1 className="text-start ml-4">{user.username}</h1>
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
+      {user ? (
+        <div className="bg-white w-full max-w-sm text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">User Profile</h1>
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-20 h-20 rounded-full bg-blue-200 flex items-center justify-center text-2xl font-bold text-blue-900">
+              {user.username[0].toUpperCase()}
             </div>
           </div>
-          <div className="flex items-center w-[368px] bg-[#F3F4F6] px-4 py-2 rounded-md">
-            <span className="font-semibold min-w-20">Role</span>
-            <span>: </span>
-            <div className="flex justify-start">
-              <h1 className="text-start ml-4">{user.role}</h1>
+
+          <div className="space-y-4 text-left">
+            {/* Gunakan grid 3 kolom */}
+            <div className="grid grid-cols-3 items-center bg-gray-100 px-4 py-2 rounded-md">
+              <span className="font-semibold text-gray-700">Username</span>
+              <span className="text-start -translate-x-5">:</span>
+              <span className="text-center -translate-x-7 text-gray-900">{user.username}</span>
+            </div>
+
+            <div className="grid grid-cols-3 items-center bg-gray-100 px-4 py-2 rounded-md">
+              <span className="font-semibold text-gray-700">Password</span>
+              <span className="text-start -translate-x-5">:</span>
+              <span className="text-center -translate-x-7 text-gray-900">{user.password}</span>
+            </div>
+
+            <div className="grid grid-cols-3 items-center bg-gray-100 px-4 py-2 rounded-md">
+              <span className="font-semibold text-gray-700">Role</span>
+              <span className="text-start -translate-x-5">:</span>
+              <span className="text-center -translate-x-7 text-gray-900">{user.role}</span>
             </div>
           </div>
+
+          <button
+            onClick={() => router.push("/")}
+            className="mt-8 w-full bg-blue-600 hover:cursor-pointer hover:bg-blue-700 text-white font-semibold py-2 rounded-md"
+          >
+            Back to home
+          </button>
         </div>
-        <button
-          onClick={() => router.push("/articles")}
-          className="bg-blue-600 text-white px-4 py-2 w-full hover:cursor-pointer rounded-md mt-4 hover:bg-blue-700 transition"
-        >
-          Back to home
-        </button>
-      </div>
+      ) : (
+        <p className="text-center text-gray-600 text-lg">Loading profile...</p>
+      )}
     </div>
   )
 }
