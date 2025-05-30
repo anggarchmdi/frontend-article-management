@@ -4,6 +4,7 @@ import axios from "@/lib/axios"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
+import toast from "react-hot-toast"
 
 export default function Register() {
   const [username, setUsername] = useState("")
@@ -38,11 +39,11 @@ export default function Register() {
 
     try {
       await axios.post("/auth/register", { username, password, role })
-      alert("Register berhasil! Silakan login.")
+       toast.success("Register berhasil! Silakan login.")
     //   console.log({username, password, role})
       router.push("/auth/login")
 } catch (err: any) {
-    alert("Register gagal, coba cek kembali!")
+     toast.error("Register gagal, coba cek kembali!")
     console.log("Register Error:", err.response?.data || err.message)
   }  
   }
@@ -103,7 +104,7 @@ export default function Register() {
         </div>
         <button
           onClick={handleRegister}
-          className="w-full py-2 bg-[#2563EB] text-white font-semibold rounded-lg hover:scale-95 transition"
+          className="w-full py-2 bg-[#2563EB] text-white hover:cursor-pointer font-semibold rounded-lg hover:scale-95 transition"
         >
           Register
         </button>

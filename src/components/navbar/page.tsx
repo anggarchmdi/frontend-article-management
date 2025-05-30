@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Cookies from "js-cookie"
 import { usePathname } from "next/navigation" 
+import toast from "react-hot-toast"
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -38,7 +39,7 @@ export default function Navbar() {
     if (authData) {
       try {
         const parsed = JSON.parse(authData);
-        setUser(parsed); // This will store username and role from the cookie
+        setUser(parsed);
       } catch (err) {
         console.error("Failed to parse auth data:", err);
         Cookies.remove("auth");
@@ -48,6 +49,7 @@ export default function Navbar() {
   
 
   const handleLogout = () => {
+    toast.error("Logout Berhasil")
     Cookies.remove("token");
     Cookies.remove("auth");
     router.push("/auth/login");
@@ -76,7 +78,7 @@ export default function Navbar() {
               onClick={() => setShowDropdown((prev) => !prev)}
               className="flex items-center gap-2 hover:underline"
             >
-              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center hover:cursor-pointer text-white font-bold">
                 {user?.username?.charAt(0).toUpperCase() || 'U'}
               </div>
 
@@ -87,7 +89,7 @@ export default function Navbar() {
               <div className="absolute right-0 mt-2 w-40 bg-white text-black border rounded-md shadow-lg py-2 z-20">
                 <Link
                   href="/profile"
-                  className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                  className="block px-4 hover:cursor-pointer py-2 hover:bg-gray-100 w-full text-left"
                   onClick={() => setShowDropdown(false)}
                 >
                   My Account
@@ -97,7 +99,7 @@ export default function Navbar() {
                     setShowDropdown(false)
                     setShowLogoutModal(true)
                   }}
-                  className="block px-4 py-2 text-red-500 hover:bg-gray-100 w-full text-left"
+                  className="block px-4 py-2 hover:cursor-pointer text-red-500 hover:bg-gray-100 w-full text-left"
                 >
                   Log out
                 </button>
@@ -116,13 +118,13 @@ export default function Navbar() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-200 rounded hover:cursor-pointer transition-all transform hover:scale-95 duration-300 hover:bg-gray-300"
               >
                 Cancel
               </button>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 hover:cursor-pointer transition-all transform hover:scale-95 duration-300 text-white rounded hover:bg-blue-700"
               >
                 Logout
               </button>

@@ -39,7 +39,7 @@ export default function RootLayout({
         {/* <Navbar /> */}
         {/* <div className="py-16"> */}
         {children}
-        <Toaster position="top-center"/>
+        <Toaster position="top-right"/>
         {/* </div> */}
       </body>
     </html>

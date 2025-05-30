@@ -4,6 +4,7 @@ import axios from "@/lib/axios"
 import { Eye, EyeOff } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast } from "react-hot-toast"
 
 export default function Login() {
   const router = useRouter()
@@ -44,14 +45,14 @@ export default function Login() {
       const auth = profileRes.data
       localStorage.setItem("auth", JSON.stringify(auth))
       document.cookie = `auth=${encodeURIComponent(JSON.stringify(auth))}; path=/`
-
+       toast.success("Login berhasil!")
       if (auth.role === "Admin") {
         router.push("/admin")
       } else {
         router.push("/articles")
       }
     } catch (err) {
-      alert("Login gagal. Periksa username atau password.")
+       toast.error("Login gagal. Periksa username atau password.")
     }
   }
 
@@ -98,7 +99,7 @@ export default function Login() {
         </div>
         <button
           onClick={handleLogin}
-          className="w-full py-2 bg-[#2563EB] text-white font-semibold rounded-lg hover:scale-95 transition"
+          className="w-full py-2 bg-[#2563EB] hover:cursor-pointer text-white font-semibold rounded-lg hover:scale-95 transition"
         >
           Login
         </button>

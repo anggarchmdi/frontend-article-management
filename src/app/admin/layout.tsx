@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { Newspaper, Tag, LogOut } from "lucide-react"
 import Cookies from "js-cookie"
 import LogoutDialog from "@/components/ui/LogoutDialog"
+import toast from "react-hot-toast"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<{ username: string } | null>(null)
@@ -27,6 +28,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [])
 
   const handleLogout = () => {
+    toast.error("logout Berhasil")
     Cookies.remove("token")
     Cookies.remove("auth")
     router.push("/auth/login")
@@ -55,7 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
           <button
             onClick={() => setShowLogoutDialog(true)}
-            className="flex items-center gap-2 hover:bg-blue-700 px-4 py-2 rounded w-full text-left"
+            className="flex items-center hover:cursor-pointer gap-2 hover:bg-blue-700 px-4 py-2 rounded w-full text-left"
           >
             <LogOut size={20} /> Logout
           </button>
